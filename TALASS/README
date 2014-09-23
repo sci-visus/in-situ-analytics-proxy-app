@@ -1,0 +1,116 @@
+Contact: 
+Aaditya G. Landge <aaditya@sci.utah.edu>
+Attila Gyulassy <jediati@sci.utah.edu>
+Peer-Timo Bremer <bremer5@llnl.gov>
+Valerio Pascucci <pascucci@sci.utah.edu>
+
+Topological Analysis Proxy-apps 
+-------------------------------
+Version 1.0
+
+This is a collection of proxy-apps for insitu topological analysis
+
+In this version, we provide an app named "localCompute" which is supported by
+utilities named "createDataBlock" and "generateData"
+We also provide an app named "joinTrees" that emulates the computation performed
+by a core or process during the "join" phases of the merge tree computation.
+
+We now provide a detailed description of each of the proxy-app
+
+(A) localCompute:
+----------------
+
+This app performs the local computation phase of the in-situ parallel merge tree
+computation. This local compute phase computes the merge tree for the data block
+assigned to the process. So the app takes as input a raw block of floats and
+computes the merge tree for that block and exits. 
+
+Usage: localCompute <input_file> <block_dim_x> <block_dim_y> <block_dim_z> [min
+threshold] [max_threshold]
+
+parameters:
+<input_file> - file containing the data block
+<block_dim_x> <block_dim_y> <block_dim_z> - data dimensions of the input block
+[min threshold] [max_threshold] - the threshold values for the data (these are
+optional parameters)
+
+A sample data file has been provided under the ParallelTopology/data folder
+named sample_data_hcci_28_28_28.raw which has dimensions of 28x28x28. This
+sample block of data has been extracted from the S3D - HCCI simulation rr_OH field
+data set. The block dimension of 28x28x28 matches the data decomposition of HCCI
+when run on 21952 cores. 
+
+Using the above sample data set, the command line for the proxy app would be as
+follows:
+localCompute ../../data/sample_data_hcci_28_28_28.raw 28 28 28 0.01
+
+where 0.01 is a suitable min_threshold value for this data set.
+
+(B) joinTrees:
+-------------
+
+This app emulates the computation performed by a core or process during the 
+"join" phases of the merge tree computation. The merge tree computation has a
+local compute phase followed by join phase which performs a hierarchical k-way
+merge to compute the merge tree. 
+
+We have provided a database of the MPI messages that were generated when
+computing a merge tree of a chunk of an S3D - HCCI(rr_OH field) data set on 8 cores. With
+the help of these stored messages the app can emulate the behavior of any of the
+8 processes that were originally used to compute the merge tree. The desired
+process id can be provided as a command line argument to the app.
+
+Usage: joinTrees <process_id> <numProcX> <numProcY> <numProcZ> <MergeFactor>
+
+parameters:
+<process_id> - the desired process rank of which the join  behavior is to be emulated
+<<numProcX> <numProcY> <numProcZ> - the process decomposition of the original
+experiment. We emulate the behavior of the <process_id> rank of the experiment
+using this app.
+<MergeFactor> - the merge factor "k" that was used in the k-way merge.
+
+Other Utilities:
+---------------
+
+1. generateData: This utility generates a block of floats of given dimensions
+using random float values.
+
+2. createDataBlock: This utility extracts a block of data from a large data set.
+One has to provide the data set file, the dimensions of the original data set,
+dimensions of the required new block and the offset from which the data block
+needs to extracted.
+
+
+How to build the app
+-------------------------------------------------------------------------------
+
+Install Prerequisites: cmake, MPI 
+
+cd ParallelTopology
+mkdir build
+cd build
+cmake ..
+make <app name> 
+
+The binaries would be built under the utilities folder in the build directory
+
+NOTE: this app is a single process app and does not use MPI. Although, MPI is
+required to build the parallelMT library being used by this app. So, a valid MPI
+path is required during the build process.
+-------------------------------------------------------------------------------
+
+
+Running the apps
+-------------------------------------------------------------------------------
+
+1) For localCompute:
+
+cd utilities
+localCompute ../../data/sample_data_hcci_28_28_28.raw 28 28 28 0.01
+
+2) For joinTrees:
+
+cd utilities
+joinTrees 0 2 2 2 2 
+
+-------------------------------------------------------------------------------
