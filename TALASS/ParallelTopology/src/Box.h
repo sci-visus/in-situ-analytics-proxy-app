@@ -145,8 +145,9 @@ public:
   // The label is formed using the following bits: 0x00FBNSEW where
   // F: Front, B:Back, N:North, S:South, E:East, W:West
   // Based on the boundary node's location the appropriate bits are set 
+  
   char boundaryLabel(PointIndex p) const {
-      char label = 0;
+  /*    char label = 0;
       //std::cout << "Local Dim: " << mLocalDimensions[0] 
       //          << "," << mLocalDimensions[1] 
       //          << "," << mLocalDimensions[2] << std::endl; 
@@ -158,6 +159,7 @@ public:
       if (p[2] == mLocalDimensions[2]-1) label = label | FRONT;
 
       return label;
+  */
   }
   
   char boundaryLabel(LocalIndexType index) const {
